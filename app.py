@@ -1,9 +1,9 @@
-
 from pathlib import Path
 
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # Find the model file beside this application
@@ -18,6 +18,15 @@ app = FastAPI(
     title="Oaktaip Crop Production Intelligence",
     description="Historical-input cereal production prediction API",
     version="1.0.0"
+)
+
+# Let the Oaktaip website call this API from the browser
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://oaktaip.com", "https://www.oaktaip.com"],
+    allow_origin_regex=r"https://.*\.pages\.dev",
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 
@@ -35,6 +44,11 @@ def home():
         "message": "Crop Production API is running",
         "docs": "/docs"
     }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.post("/predict")
